@@ -27,11 +27,13 @@ describe('cachingFetch', () => {
         json: () => Promise.resolve(mockData),
       });
 
-      const { result, waitForNextUpdate } = renderHook(() => useCachingFetch('https://api.example.com/data'));
+      const { result } = renderHook(() => useCachingFetch('https://api.example.com/data'));
 
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
 
       expect(result.current).toEqual({
         isLoading: false,
@@ -44,11 +46,13 @@ describe('cachingFetch', () => {
       const errorMessage = 'Network error';
       (global.fetch as jest.Mock).mockRejectedValueOnce(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useCachingFetch('https://api.example.com/data'));
+      const { result } = renderHook(() => useCachingFetch('https://api.example.com/data'));
 
       expect(result.current.isLoading).toBe(true);
 
-      await waitForNextUpdate();
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 0));
+      });
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeInstanceOf(Error);
