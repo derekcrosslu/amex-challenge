@@ -27,7 +27,7 @@ describe('cachingFetch', () => {
     it('should return initial state', () => {
       const { result } = renderHook(() => useCachingFetch(API_URL));
       expect(result.current).toEqual({
-        isLoading: false,
+        isLoading: true,
         data: null,
         error: null,
       });
@@ -40,13 +40,11 @@ describe('cachingFetch', () => {
         json: () => Promise.resolve(mockData),
       });
 
-      const { result } = renderHook(() => useCachingFetch(API_URL));
+      const { result, waitForNextUpdate } = renderHook(() => useCachingFetch(API_URL));
 
       expect(result.current.isLoading).toBe(true);
 
-      await act(async () => {
-        await jest.runAllTimersAsync();
-      });
+      await waitForNextUpdate();
 
       expect(result.current).toEqual({
         isLoading: false,
@@ -59,13 +57,11 @@ describe('cachingFetch', () => {
       const errorMessage = 'Network error';
       (global.fetch as jest.Mock).mockRejectedValueOnce(new Error(errorMessage));
 
-      const { result } = renderHook(() => useCachingFetch(API_URL));
+      const { result, waitForNextUpdate } = renderHook(() => useCachingFetch(API_URL));
 
       expect(result.current.isLoading).toBe(true);
 
-      await act(async () => {
-        await jest.runAllTimersAsync();
-      });
+      await waitForNextUpdate();
 
       expect(result.current.isLoading).toBe(false);
       expect(result.current.error).toBeInstanceOf(Error);
@@ -79,11 +75,9 @@ describe('cachingFetch', () => {
         json: () => Promise.resolve(mockData),
       });
 
-      const { result, rerender } = renderHook(() => useCachingFetch(API_URL));
+      const { result, waitForNextUpdate } = renderHook(() => useCachingFetch(API_URL));
 
-      await act(async () => {
-        await jest.runAllTimersAsync();
-      });
+      await waitForNextUpdate();
 
       expect(result.current).toEqual({
         isLoading: false,
@@ -91,9 +85,9 @@ describe('cachingFetch', () => {
         error: null,
       });
 
-      rerender();
+      const { result: result2 } = renderHook(() => useCachingFetch(API_URL));
 
-      expect(result.current).toEqual({
+      expect(result2.current).toEqual({
         isLoading: false,
         data: mockData,
         error: null,
@@ -115,11 +109,9 @@ describe('cachingFetch', () => {
           json: () => Promise.resolve(mockData2),
         });
 
-      const { result, rerender } = renderHook(() => useCachingFetch(API_URL));
+      const { result, waitForNextUpdate } = renderHook(() => useCachingFetch(API_URL));
 
-      await act(async () => {
-        await jest.runAllTimersAsync();
-      });
+      await waitForNextUpdate();
 
       expect(result.current).toEqual({
         isLoading: false,
@@ -130,13 +122,11 @@ describe('cachingFetch', () => {
       // Move time forward past cache expiration
       jest.advanceTimersByTime(61 * 1000);
 
-      rerender();
+      const { result: result2, waitForNextUpdate: waitForNextUpdate2 } = renderHook(() => useCachingFetch(API_URL));
 
-      await act(async () => {
-        await jest.runAllTimersAsync();
-      });
+      await waitForNextUpdate2();
 
-      expect(result.current).toEqual({
+      expect(result2.current).toEqual({
         isLoading: false,
         data: mockData2,
         error: null,
@@ -233,15 +223,14 @@ describe('cachingFetch', () => {
 
       wipeCache();
 
-      const { result: result1 } = renderHook(() => useCachingFetch(API_URL));
-      const { result: result2 } = renderHook(() => useCachingFetch(`${API_URL}?param=1`));
+      const { result: result1, waitForNextUpdate: waitForNextUpdate1 } = renderHook(() => useCachingFetch(API_URL));
+      const { result: result2, waitForNextUpdate: waitForNextUpdate2 } = renderHook(() => useCachingFetch(`${API_URL}?param=1`));
 
       expect(result1.current.isLoading).toBe(true);
       expect(result2.current.isLoading).toBe(true);
 
-      await act(async () => {
-        await jest.runAllTimersAsync();
-      });
+      await waitForNextUpdate1();
+      await waitForNextUpdate2();
 
       expect(result1.current).toEqual({
         isLoading: false,
