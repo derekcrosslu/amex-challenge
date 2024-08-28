@@ -71,5 +71,5 @@ export const initializeCache = (serializedCache: string): void => {
 };
 
 export const wipeCache = (): void => {
-  Object.keys(cache).forEach(key => delete cache[key]);
+  Object.keys(cache).forEach((key) => delete cache[key]);
 };
