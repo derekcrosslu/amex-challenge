@@ -29,10 +29,12 @@ describe('App', () => {
     const useCachingFetch = require('../caching-fetch-library/cachingFetch').useCachingFetch;
     useCachingFetch.mockReturnValue({
       isLoading: false,
-      data: [
-        { id: 1, name: 'John Doe', age: 30 },
-        { id: 2, name: 'Jane Smith', age: 25 },
-      ],
+      data: {
+        results: [
+          { id: '1', name: 'John Doe', age: '30' },
+          { id: '2', name: 'Jane Smith', age: '25' },
+        ]
+      },
       error: null,
     });
 
